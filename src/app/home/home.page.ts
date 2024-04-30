@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import EscPosEncoder from 'esc-pos-encoder-ionic';
-import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
+import { BluetoothSerial } from 'bluetooth-serial';
 
 @Component({
   selector: 'app-home',
@@ -9,8 +9,8 @@ import { BluetoothSerial } from '@awesome-cordova-plugins/bluetooth-serial/ngx';
 })
 export class HomePage {
 
-  MAC_ADDRESS = 'DC:0D:51:F2:57:99'; // check your mac address in listDevices or discoverUnpaired
-  constructor(private bluetoothSerial: BluetoothSerial) {
+  MAC_ADDRESS = '41:1D:2A:18:53:0E'; // check your mac address in listDevices or discoverUnpaired
+  constructor() {
     let encoder = new EscPosEncoder();
 
     let result = encoder
@@ -27,7 +27,7 @@ export class HomePage {
 
   listDevices(){
     console.log("LIST DEVICES");
-    this.bluetoothSerial.list().then(function(devices) {
+    BluetoothSerial.list().then(function({devices}) {
       devices.forEach(function(device: any) {
         console.log("Device id: ", device.id);
         console.log("Device name: ", device.name);
@@ -39,7 +39,7 @@ export class HomePage {
 
   discoverUnpaired(){
     console.log("LIST UNPAIRED DEVICES");
-    this.bluetoothSerial.discoverUnpaired().then(function(devices) {
+    BluetoothSerial.discoverUnpaired().then(function({devices}) {
       devices.forEach(function(device: any) {
         console.log("Unpaired device ID: ", device.id);
         console.log("Unpaired device NAME: ", device.name);
@@ -73,11 +73,13 @@ export class HomePage {
     const resultByte = result.encode();
 
     // send byte code into the printer
-    this.bluetoothSerial.connect(this.MAC_ADDRESS).subscribe(() => {
-      this.bluetoothSerial.write(resultByte)
+    BluetoothSerial.connect({
+      address: this.MAC_ADDRESS
+    }).then(() => {
+      BluetoothSerial.write(resultByte)
         .then(() => {
-          this.bluetoothSerial.clear();
-          this.bluetoothSerial.disconnect();
+          BluetoothSerial.clear();
+          BluetoothSerial.disconnect();
           console.log('Print success');
         })
         .catch((err) => {
